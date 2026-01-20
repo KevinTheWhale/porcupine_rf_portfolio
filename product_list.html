@@ -1,0 +1,438 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products | Porcupine RF</title>
+    <!-- Futuristic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("/media/site_backgrounds/website_background4.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            padding: 30px;
+            gap: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 0 auto;
+        }
+
+        .nav-buttons a {
+            padding: 10px 20px;
+            border-radius: 9999px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+            overflow: hidden;
+        }
+
+        .nav-buttons a span {
+            display: inline-block;
+            transition: color 0.3s ease;
+            font-family: 'Saira Condensed', sans-serif;
+        }
+
+        .nav-buttons a:hover {
+            border: 1px solid skyblue;
+            box-shadow: 0 0 8px skyblue;
+        }
+
+        .nav-buttons a:hover span,
+        .nav-buttons a.active span {
+            color: skyblue;
+            text-decoration: underline;
+            text-decoration-color: skyblue;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 6px;
+        }
+
+        .content {
+            padding: 40px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            max-width: 900px;
+            margin: 40px auto;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        input[type="text"] {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 9999px;
+            background-color: lightsteelblue;
+            color: black;
+            width: 30%;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        #compareToggle {
+            padding: 10px 20px;
+            margin-left: 20px;
+            border: none;
+            border-radius: 9999px;
+            background-color: skyblue;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            float: right;
+        }
+
+        .device-link {
+            color: black;
+            text-decoration: underline;
+        }
+
+        .device-link:visited,
+        .device-link:hover,
+        .device-link:active {
+            color: black;
+            text-decoration: underline;
+        }
+
+        tr.clickable-row {
+            cursor: pointer;
+        }
+
+        thead tr {
+            background-color: black;
+            color: white;
+        }
+
+        tbody tr {
+            background-color: white;
+            color: black;
+        }
+
+        tbody tr:not(:last-child) {
+            border-bottom: 1px solid black;
+        }
+
+        tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        th:last-child, td:last-child {
+            text-align: center;
+            width: 60px;
+        }
+
+        .sort-arrow {
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+
+        td:last-child, th:last-child {
+            border-left: 2px solid skyblue;
+        }
+
+        .brand-banner { flex: 1; height: 84px; }
+        .svg-link { cursor: pointer; }
+        .wave-trail { stroke: url(#pulseGradient); stroke-width: 2.5; fill: none; }
+        .wave-stroke { stroke: skyblue; stroke-width: 2.5; fill: none; stroke-dasharray: 2200; stroke-dashoffset: 2200; animation: waveDraw 3.5s linear infinite; }
+        @keyframes waveDraw {
+            0%   { stroke-dashoffset: 2200; opacity: 0; }
+            10%  { opacity: 1; }
+            80%  { stroke-dashoffset: 0; opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes ecgPulse {
+            0%   { stroke-dashoffset: 2000; opacity: 0; }
+            10%  { opacity: 1; }
+            80%  { stroke-dashoffset: 0; opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes moveDot {
+            from { transform: translateX(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { transform: translateX(500px); opacity: 1; }
+            to   { opacity: 0; }
+        }
+    </style>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("liveSearch");
+        const emptyMsg = document.getElementById("emptyMessage");
+        const compareBtn = document.getElementById("compareToggle");
+
+        input.addEventListener("keyup", function () {
+            const query = input.value.toLowerCase();
+            const rows = document.querySelectorAll("#deviceTable tbody tr");
+            let anyVisible = false;
+
+            rows.forEach(row => {
+                const modelCell = row.querySelector("td:nth-child(1)"); /* Search by Model name capability */
+                const modelText = modelCell?.textContent.toLowerCase() || "";
+
+                if (modelText.includes(query)) {
+                    row.style.display = "";
+                    anyVisible = true;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            emptyMsg.style.display = anyVisible ? "none" : "table-row";
+        });
+
+        document.querySelectorAll(".clickable-row").forEach(row => {
+            row.addEventListener("click", function (e) {
+                const cellIndex = Array.from(row.cells).indexOf(e.target.closest('td'));
+                const isLastCell = cellIndex === row.cells.length - 1;
+
+                if (!e.target.closest("a") && e.target.type !== "checkbox" && !isLastCell) {
+                    window.open(this.dataset.href, '_blank');
+                }
+            });
+        });
+
+        compareBtn.addEventListener("click", function () {
+            const allRows = document.querySelectorAll("#deviceTable tbody tr");
+            const checkedRows = Array.from(allRows).filter(row =>
+                row.querySelector(".compare-checkbox")?.checked
+            );
+
+            if (compareBtn.textContent === "Compare") {
+                if (checkedRows.length === 0) {
+                    alert("Please select at least one row to compare.");
+                    return;
+                }
+
+                allRows.forEach(row => {
+                    const checkbox = row.querySelector(".compare-checkbox");
+                    row.style.display = checkbox && checkbox.checked ? "" : "none";
+                });
+
+                compareBtn.textContent = "Reset";
+            } else {
+                allRows.forEach(row => {
+                    row.style.display = "";
+                    const checkbox = row.querySelector(".compare-checkbox");
+                    if (checkbox) checkbox.checked = false;
+                });
+
+                compareBtn.textContent = "Compare";
+            }
+        });
+
+        document.querySelectorAll('.sort-arrow').forEach(function (arrow) {
+            arrow.addEventListener('click', function () {
+                const index = parseInt(this.dataset.index);
+                const table = document.getElementById("deviceTable");
+                const tbody = table.querySelector("tbody");
+                const rowsArray = Array.from(tbody.querySelectorAll("tr")).filter(row => row.id !== "emptyMessage");
+
+                let direction = this.dataset.sort === "asc" ? "desc" : "asc";
+                this.dataset.sort = direction;
+
+                const numericIndices = [2, 4, 5, 6, 7]; // Operate Frequency, Pout, Power Gain, Efficiency, Vds
+                const isNumericColumn = numericIndices.includes(index);
+
+                rowsArray.sort((a, b) => {
+                    let aText = a.cells[index].textContent.trim();
+                    let bText = b.cells[index].textContent.trim();
+
+                    if (isNumericColumn) {
+                        let aNum = parseFloat(aText.replace(/[^\d.-]/g, '')) || 0;
+                        let bNum = parseFloat(bText.replace(/[^\d.-]/g, '')) || 0;
+                        return direction === "asc" ? aNum - bNum : bNum - aNum;
+                    } else {
+                        return direction === "asc" ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                    }
+                });
+
+                rowsArray.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+    </script>
+</head>
+<body>
+    <div class="top-bar">
+
+        <!-- SVG logo + wave from home.html -->
+        <svg class="brand-banner" viewBox="0 0 1040 84" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="pulseGradient" x1="0" y1="0" x2="1040" y2="0">
+                    <stop offset="0%"   stop-color="skyblue" stop-opacity="0.12"/>
+                    <stop offset="50%"  stop-color="skyblue" stop-opacity="0.55"/>
+                    <stop offset="100%" stop-color="skyblue" stop-opacity="0.12"/>
+                </linearGradient>
+            </defs>
+    
+            <a href="/" class="svg-link" aria-label="Go to homepage">
+                <text x="45" y="43" fill="white"
+                      font-family="Saira Condensed, sans-serif"
+                      font-weight="800" font-size="61">Porcupine</text>
+            </a>
+    
+            <text x="45" y="70" fill="#cfe8ff"
+                  font-family="Arial, sans-serif" font-size="14"
+                  lengthAdjust="spacingAndGlyphs" textLength="320">
+                RF &amp; Microwave Innovations Inc.
+            </text>
+    
+                   <!-- Continuous path: flat underline -> two square waves (peaks now at y=6) -> flowing ECG -->
+            <!-- Baseline: y=50 -->
+            <!-- Continuous path: thinner square waves -->
+    <path id="fullPath" class="wave-trail" d="
+    M0 50 L300 50                 <!-- flat line under 'Porcupine' -->
+    L300 6 L324 6 L324 50         <!-- first square wave (thinner) -->
+    L344 50                       <!-- short flat gap -->
+    L344 6 L368 6 L368 50         <!-- second square wave (thinner) -->
+    L438 50
+    C450 50, 462 50, 474 50
+    C476 30, 482 22, 488 50
+    C492 68, 496 56, 500 50
+    C514 50, 530 50, 546 50
+    C548 34, 554 26, 560 50
+    C564 70, 568 54, 572 50
+    C586 50, 602 50, 618 50
+    C620 38, 626 28, 632 50
+    C636 66, 640 56, 644 50
+    C658 50, 674 50, 690 50
+    C692 36, 698 24, 704 50
+    C708 66, 712 56, 716 50
+    C730 50, 746 50, 762 50
+    C764 34, 770 26, 776 50
+    C780 68, 784 58, 788 50
+    C802 50, 818 50, 834 50
+    C836 36, 842 28, 848 50
+    C852 68, 856 56, 860 50
+    C876 50, 896 50, 1280 50" />
+
+<path class="wave-stroke" d="
+    M0 50 L300 50
+    L300 6 L324 6 L324 50
+    L344 50
+    L344 6 L368 6 L368 50
+    L438 50
+    C450 50, 462 50, 474 50
+    C476 30, 482 22, 488 50
+    C492 68, 496 56, 500 50
+    C514 50, 530 50, 546 50
+    C548 34, 554 26, 560 50
+    C564 70, 568 54, 572 50
+    C586 50, 602 50, 618 50
+    C620 38, 626 28, 632 50
+    C636 66, 640 56, 644 50
+    C658 50, 674 50, 690 50
+    C692 36, 698 24, 704 50
+    C708 66, 712 56, 716 50
+    C730 50, 746 50, 762 50
+    C764 34, 770 26, 776 50
+    C780 68, 784 58, 788 50
+    C802 50, 818 50, 834 50
+    C836 36, 842 28, 848 50
+    C852 68, 856 56, 860 50
+    C876 50, 896 50, 1280 50" />
+</svg>
+    
+        <div class="nav-buttons">
+            <a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                <span>About</span>
+            </a>
+            <a href="{% url 'product_list' %}" class="{% if '/products/' in request.path %}active{% endif %}">
+                <span>Products</span>
+            </a>
+            <a href="/support/" class="{% if request.path == '/support/' %}active{% endif %}">
+                <span>Sale/Support</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="content">
+        <h1>Products</h1>
+        <p style="margin-top: 10px; max-width: 800px;">{{ description }}</p>
+        <input type="text" id="liveSearch" placeholder="Search by model...">
+        <button id="compareToggle">Compare</button>
+
+        <table id="deviceTable">
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    <th>Product<br>Type</th>
+                    <th>Operate<br>Frequency<br>(MHz)</th>
+                    <th>Pulse Format<br>/ Duty Factor</th>
+                    <th>Pout<br>(W)</th>
+                    <th>Power Gain<br>(dB)</th>
+                    <th>Typical<br>Efficiency (%)</th>
+                    <th>Vds<br>(V)</th>
+                    <th>Select</th>
+                </tr>
+                <tr>
+                    <th><span class="sort-arrow" data-index="1">▲</span></th>
+                    <th><span class="sort-arrow" data-index="2">▲</span></th>
+                    <th><span class="sort-arrow" data-index="3">▲</span></th>
+                    <th><span class="sort-arrow" data-index="4">▲</span></th>
+                    <th><span class="sort-arrow" data-index="5">▲</span></th>
+                    <th><span class="sort-arrow" data-index="6">▲</span></th>
+                    <th><span class="sort-arrow" data-index="7">▲</span></th>
+                    <th><span class="sort-arrow" data-index="8">▲</span></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in devices %}
+                <tr class="clickable-row" data-href="{% url 'device_detail' device.model %}">
+                    <td>
+                        <a href="{% url 'device_detail' device.model %}" class="device-link" target="_blank">
+                            {{ device.model }}
+                        </a>
+                    </td>
+                    <td>{{ device.product_type|default:"N/A" }}</td>
+                    <td>{{ device.operate_frequency|default:"N/A" }}</td>
+                    <td>{{ device.pulse_format|default:"N/A" }}</td>
+                    <td>{{ device.pout|default:"N/A" }}</td>
+                    <td>{{ device.power_gain|default:"N/A" }}</td>
+                    <td>{{ device.typical_efficiency|default:"N/A" }}</td>
+                    <td>{{ device.vds|default:"N/A" }}</td>
+                    <td><input type="checkbox" class="compare-checkbox"></td>
+                </tr>
+                {% empty %}
+                <tr id="emptyMessage">
+                    <td colspan="9">No matching products found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include 'catalog/footer.html' %}
+</body>
+</html>
