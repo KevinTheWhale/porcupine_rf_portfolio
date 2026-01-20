@@ -15,3 +15,17 @@ This repository showcases the HTML templates and frontend design for a commercia
 🔒 Note: This repository includes only frontend .html templates for demonstration purposes. Backend code (models, views, admin, settings) and database structure are intentionally omitted for security.
 
 🔗 Live site: https://porcupinerf.com
+
+## 🔍 Preview
+
+### Homepage
+![Homepage](Screenshots/Home.png)
+
+### About
+![About](Screenshots/About.png)
+
+### Product List with Compare Mode
+![Product List](Screenshots/product_list.png)
+
+### Device Detail View
+![Device Detail](Screenshots/device_detail.png)
